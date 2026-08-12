@@ -16,7 +16,8 @@ if (!existsSync(workerPath)) {
 rmSync(distDir, { recursive: true, force: true });
 mkdirSync(serverDir, { recursive: true });
 cpSync(openNextDir, distDir, { recursive: true });
-writeFileSync(join(serverDir, "index.js"), "export { default } from \"../worker.js\";\n");
+cpSync(openNextDir, serverDir, { recursive: true });
+cpSync(workerPath, join(serverDir, "index.js"));
 
 if (existsSync(hostingPath)) {
   mkdirSync(join(distDir, ".openai"), { recursive: true });
