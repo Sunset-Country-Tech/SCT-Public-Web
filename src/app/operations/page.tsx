@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { OperationsApp } from "@/components/OperationsApp";
 import { AUTH_COOKIE, getAuthSecret, verifySession } from "@/lib/auth-cookie";
 import type { Role } from "@/lib/workflows";
@@ -12,5 +13,9 @@ export default async function OperationsPage() {
     getAuthSecret(),
   );
 
-  return <OperationsApp sessionRole={(session?.role as Role | undefined) ?? "Owner"} />;
+  if (!session) {
+    redirect("/login?returnTo=/operations");
+  }
+
+  return <OperationsApp sessionRole={session.role as Role} />;
 }
