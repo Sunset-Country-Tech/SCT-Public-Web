@@ -1,0 +1,16 @@
+import { cookies } from "next/headers";
+import { OperationsApp } from "@/components/OperationsApp";
+import { AUTH_COOKIE, getAuthSecret, verifySession } from "@/lib/auth-cookie";
+import type { Role } from "@/lib/workflows";
+
+export const dynamic = "force-dynamic";
+
+export default async function OperationsPage() {
+  const cookieStore = await cookies();
+  const session = await verifySession(
+    cookieStore.get(AUTH_COOKIE)?.value,
+    getAuthSecret(),
+  );
+
+  return <OperationsApp sessionRole={(session?.role as Role | undefined) ?? "Owner"} />;
+}

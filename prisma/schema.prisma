@@ -1,0 +1,592 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum JobPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  VIEWED
+  APPROVED
+  DECLINED
+  EXPIRED
+  SUPERSEDED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum CommunicationType {
+  EMAIL
+  SMS
+  PHONE
+  IN_PERSON
+  SYSTEM
+  OTHER
+}
+
+model User {
+  id             String        @id @default(cuid())
+  name           String
+  email          String        @unique
+  passwordHash   String?
+  active         Boolean       @default(true)
+  roleId         String
+  role           Role          @relation(fields: [roleId], references: [id])
+  assignedJobs   Job[]
+  labourEntries  LabourEntry[]
+  communications Communication[]
+  auditLogs      AuditLog[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id    String           @id @default(cuid())
+  key   String           @unique
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([roleId, permissionId])
+}
+
+model Customer {
+  id                 String                    @id @default(cuid())
+  customerNumber     String                    @unique
+  type               CustomerType
+  firstName          String?
+  lastName           String?
+  businessName       String?
+  phone              String?
+  email              String?
+  preferredContact   String?
+  address            String?
+  suburb             String?
+  state              String?
+  postcode           String?
+  serviceArea        String?
+  notes              String?
+  tags               CustomerTag[]
+  businesses         BusinessContact[]
+  devices            Device[]
+  jobs               Job[]
+  quotes             Quote[]
+  invoices           Invoice[]
+  payments           Payment[]
+  communications     Communication[]
+  files              JobFile[]
+  warranties         Warranty[]
+  digitalLiteracy    DigitalLiteracyProfile?
+  tasks              Task[]
+  deletedAt          DateTime?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+}
+
+model Business {
+  id             String            @id @default(cuid())
+  name           String
+  abn            String?
+  billingEmail   String?
+  phone          String?
+  address        String?
+  numberOfUsers  Int?
+  notes          String?
+  contacts       BusinessContact[]
+  sites          Site[]
+  jobs           Job[]
+  devices        Device[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model BusinessContact {
+  businessId String
+  customerId String
+  title      String?
+  primary    Boolean  @default(false)
+  billing    Boolean  @default(false)
+  business   Business @relation(fields: [businessId], references: [id])
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  @@id([businessId, customerId])
+}
+
+model Site {
+  id               String         @id @default(cuid())
+  businessId       String
+  business         Business       @relation(fields: [businessId], references: [id])
+  name             String
+  address          String?
+  primaryContact   String?
+  internetProvider String?
+  router           String?
+  network          String?
+  wifi             String?
+  printers         String?
+  servers          String?
+  nas              String?
+  cameras          String?
+  notes            String?
+  networkAssets    NetworkAsset[]
+}
+
+model Device {
+  id             String     @id @default(cuid())
+  deviceNumber   String     @unique
+  customerId     String
+  businessId     String?
+  customer       Customer   @relation(fields: [customerId], references: [id])
+  business       Business?  @relation(fields: [businessId], references: [id])
+  type           String
+  brand          String?
+  model          String?
+  serialNumber   String?
+  colour         String?
+  operatingSystem String?
+  purchaseDate   DateTime?
+  assetTag       String?
+  imei           String?
+  macAddress     String?
+  warrantyStatus String?
+  notes          String?
+  jobs           Job[]
+  warranties     Warranty[]
+}
+
+model JobStatus {
+  id        String @id @default(cuid())
+  name      String @unique
+  sortOrder Int
+  jobs      Job[]
+}
+
+model Job {
+  id                   String             @id @default(cuid())
+  jobNumber            String             @unique
+  customerId           String
+  businessId           String?
+  deviceId             String?
+  statusId             String
+  assignedTechnicianId String?
+  customer             Customer           @relation(fields: [customerId], references: [id])
+  business             Business?          @relation(fields: [businessId], references: [id])
+  device               Device?            @relation(fields: [deviceId], references: [id])
+  status               JobStatus          @relation(fields: [statusId], references: [id])
+  assignedTechnician   User?              @relation(fields: [assignedTechnicianId], references: [id])
+  type                 String
+  priority             JobPriority        @default(NORMAL)
+  openedAt             DateTime           @default(now())
+  dueAt                DateTime?
+  location             String?
+  customerDescription  String
+  internalDescription  String?
+  diagnosticNotes      String?
+  workPerformed        String?
+  recommendations      String?
+  customerVisibleNotes String?
+  internalNotes        String?
+  statusHistory        JobStatusHistory[]
+  notes                JobNote[]
+  files                JobFile[]
+  quotes               Quote[]
+  invoices             Invoice[]
+  parts                Part[]
+  labourEntries        LabourEntry[]
+  appointments         Appointment[]
+  communications       Communication[]
+  warranties           Warranty[]
+  warrantyClaims       WarrantyClaim[]
+  tasks                Task[]
+  threeDPrintJob       ThreeDPrintJob?
+  deletedAt            DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+}
+
+model JobStatusHistory {
+  id             String   @id @default(cuid())
+  jobId          String
+  job            Job      @relation(fields: [jobId], references: [id])
+  changedBy      String?
+  previousStatus String?
+  newStatus      String
+  changedAt      DateTime @default(now())
+}
+
+model JobNote {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id])
+  visibility String
+  body      String
+  authorId  String?
+  createdAt DateTime @default(now())
+}
+
+model JobFile {
+  id          String    @id @default(cuid())
+  customerId  String?
+  jobId       String?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+  job         Job?      @relation(fields: [jobId], references: [id])
+  filename    String
+  contentType String
+  storageKey  String
+  sizeBytes   Int
+  createdAt   DateTime  @default(now())
+}
+
+model Quote {
+  id          String          @id @default(cuid())
+  quoteNumber String          @unique
+  customerId  String
+  jobId       String?
+  customer    Customer        @relation(fields: [customerId], references: [id])
+  job         Job?            @relation(fields: [jobId], references: [id])
+  status      QuoteStatus     @default(DRAFT)
+  secureToken String          @unique
+  expiresAt   DateTime?
+  notes       String?
+  items       QuoteItem[]
+  approvals   QuoteApproval[]
+  deletedAt   DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model QuoteItem {
+  id          String @id @default(cuid())
+  quoteId     String
+  quote       Quote  @relation(fields: [quoteId], references: [id])
+  description String
+  quantity    Decimal
+  unitPrice   Decimal
+  taxRate     Decimal @default(0)
+  type        String
+}
+
+model QuoteApproval {
+  id        String   @id @default(cuid())
+  quoteId   String
+  quote     Quote    @relation(fields: [quoteId], references: [id])
+  decision  String
+  name      String
+  comment   String?
+  ipAddress String?
+  method    String
+  createdAt DateTime @default(now())
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  customerId    String
+  jobId         String?
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  job           Job?          @relation(fields: [jobId], references: [id])
+  status        InvoiceStatus @default(DRAFT)
+  issuedAt      DateTime?
+  dueAt         DateTime?
+  gstRegistered Boolean       @default(false)
+  items         InvoiceItem[]
+  payments      Payment[]
+  warranties    Warranty[]
+  deletedAt     DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  description String
+  quantity    Decimal
+  unitPrice   Decimal
+  taxRate     Decimal @default(0)
+  type        String
+}
+
+model Payment {
+  id        String   @id @default(cuid())
+  invoiceId String
+  customerId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
+  customer  Customer @relation(fields: [customerId], references: [id])
+  amount    Decimal
+  method    String
+  reference String?
+  notes     String?
+  paidAt    DateTime
+  deletedAt DateTime?
+}
+
+model Part {
+  id                 String   @id @default(cuid())
+  jobId              String
+  job                Job      @relation(fields: [jobId], references: [id])
+  name               String
+  supplier           String?
+  supplierPartNumber String?
+  cost               Decimal?
+  sellPrice          Decimal?
+  quantity           Decimal  @default(1)
+  orderNumber        String?
+  trackingNumber     String?
+  eta                DateTime?
+  orderedAt          DateTime?
+  receivedAt         DateTime?
+  status             String
+}
+
+model LabourEntry {
+  id        String   @id @default(cuid())
+  jobId     String
+  userId    String
+  job       Job      @relation(fields: [jobId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  startedAt DateTime
+  endedAt   DateTime?
+  durationMinutes Int?
+  type      String
+  billable  Boolean  @default(true)
+  rate      Decimal?
+  notes     String?
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  customerId String?
+  jobId     String?
+  job       Job?     @relation(fields: [jobId], references: [id])
+  type      String
+  startsAt  DateTime
+  endsAt    DateTime
+  location  String?
+  assignedStaff String?
+  notes     String?
+}
+
+model Communication {
+  id        String            @id @default(cuid())
+  customerId String?
+  jobId     String?
+  staffId   String?
+  customer  Customer?         @relation(fields: [customerId], references: [id])
+  job       Job?              @relation(fields: [jobId], references: [id])
+  staff     User?             @relation(fields: [staffId], references: [id])
+  type      CommunicationType
+  direction String
+  subject   String?
+  body      String?
+  status    String?
+  createdAt DateTime          @default(now())
+}
+
+model Task {
+  id         String    @id @default(cuid())
+  title      String
+  customerId String?
+  jobId      String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  job        Job?      @relation(fields: [jobId], references: [id])
+  assignedTo String?
+  dueAt      DateTime?
+  priority   String
+  status     String
+  notes      String?
+}
+
+model Warranty {
+  id             String          @id @default(cuid())
+  warrantyNumber String          @unique
+  jobId          String
+  invoiceId      String?
+  customerId     String
+  deviceId       String?
+  job            Job             @relation(fields: [jobId], references: [id])
+  invoice        Invoice?        @relation(fields: [invoiceId], references: [id])
+  customer       Customer        @relation(fields: [customerId], references: [id])
+  device         Device?         @relation(fields: [deviceId], references: [id])
+  coveredWork    String
+  coveredParts   String?
+  startsAt       DateTime
+  endsAt         DateTime
+  notes          String?
+  claims         WarrantyClaim[]
+}
+
+model WarrantyClaim {
+  id              String   @id @default(cuid())
+  warrantyId      String
+  originalJobId   String
+  warranty        Warranty @relation(fields: [warrantyId], references: [id])
+  originalJob     Job      @relation(fields: [originalJobId], references: [id])
+  reportedProblem String
+  assessment      String?
+  outcome         String?
+  status          String
+  notes           String?
+}
+
+model DigitalLiteracyProfile {
+  id                 String                    @id @default(cuid())
+  profileNumber      String                    @unique
+  customerId         String                    @unique
+  customer           Customer                  @relation(fields: [customerId], references: [id])
+  goals              String
+  confidenceLevel    String
+  topics             String
+  accessibilityNotes String?
+  preferredSessionType String?
+  skills             DigitalLiteracySkill[]
+  sessions           DigitalLiteracySession[]
+}
+
+model DigitalLiteracySkill {
+  id        String                 @id @default(cuid())
+  profileId String
+  profile   DigitalLiteracyProfile @relation(fields: [profileId], references: [id])
+  name      String
+  level     String
+  notes     String?
+  reviewAt  DateTime?
+}
+
+model DigitalLiteracySession {
+  id            String                 @id @default(cuid())
+  sessionNumber String                 @unique
+  profileId     String
+  profile       DigitalLiteracyProfile @relation(fields: [profileId], references: [id])
+  startsAt      DateTime
+  endsAt        DateTime
+  instructor    String
+  location      String?
+  goals         String
+  topics        String
+  activities    String
+  confidence    String?
+  practiceTasks String?
+  nextSteps     String?
+  internalNotes String?
+}
+
+model ThreeDPrintJob {
+  id              String   @id @default(cuid())
+  printNumber     String   @unique
+  jobId           String   @unique
+  job             Job      @relation(fields: [jobId], references: [id])
+  partName        String
+  purpose         String?
+  quantity        Int
+  material        String?
+  colour          String?
+  fileStorageKey  String?
+  designRequired  Boolean  @default(false)
+  dimensions      String?
+  tolerance       String?
+  strengthRequirements String?
+  finish          String?
+  printTimeEstimateMinutes Int?
+  materialUsageGrams Decimal?
+  designCharge    Decimal?
+  printCharge     Decimal?
+  status          String
+}
+
+model NetworkAsset {
+  id        String @id @default(cuid())
+  siteId    String
+  site      Site   @relation(fields: [siteId], references: [id])
+  type      String
+  make      String?
+  model     String?
+  serial    String?
+  mac       String?
+  ip        String?
+  location  String?
+  notes     String?
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  type      String
+  name      String
+  subject   String?
+  body      String
+  variables String
+  active    Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model GeneratedDocument {
+  id          String   @id @default(cuid())
+  type        String
+  entityType  String
+  entityId    String
+  storageKey  String
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  event         String
+  entityType    String
+  entityId      String
+  previousValue Json?
+  newValue      Json?
+  createdAt     DateTime @default(now())
+}
+
+model Tag {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  customers CustomerTag[]
+}
+
+model CustomerTag {
+  customerId String
+  tagId      String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  tag        Tag      @relation(fields: [tagId], references: [id])
+
+  @@id([customerId, tagId])
+}

@@ -2,22 +2,12 @@
 
 import { FormEvent, useState } from "react";
 import { Send } from "lucide-react";
-
-const serviceOptions = [
-  "Computer Repair",
-  "Tech Support",
-  "IT Tutoring",
-  "Networking / Wi-Fi",
-  "Security Cameras",
-  "Smart Home",
-  "Business IT",
-  "3D Printing",
-  "Other",
-];
+import Script from "next/script";
+import { contactServices } from "@/lib/site-data";
 
 type FormStatus = "idle" | "success" | "error";
 
-export function ContactForm() {
+export function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: string }) {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,18 +18,8 @@ export function ContactForm() {
 
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const endpoint = process.env.NEXT_PUBLIC_CONTACT_FORM_ENDPOINT;
-
-    if (!endpoint) {
-      await new Promise((resolve) => setTimeout(resolve, 450));
-      setStatus("success");
-      form.reset();
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: { Accept: "application/json" },
         body: formData,
@@ -59,13 +39,16 @@ export function ContactForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-[8px] border border-white/10 bg-white p-6 text-slate-950 shadow-2xl shadow-black/30"
-    >
-      <div className="grid gap-5 sm:grid-cols-2">
+    <>
+      {turnstileSiteKey ? <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" /> : null}
+      <form
+        onSubmit={handleSubmit}
+        className="rounded-[8px] border border-white/10 bg-white p-6 text-slate-950 shadow-2xl shadow-black/30"
+      >
+        <input type="text" name="companyWebsite" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
+        <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2 text-sm font-semibold">
-          Name
+          Name *
           <input
             required
             name="name"
@@ -75,7 +58,7 @@ export function ContactForm() {
           />
         </label>
         <label className="grid gap-2 text-sm font-semibold">
-          Email
+          Email *
           <input
             required
             name="email"
@@ -96,25 +79,7 @@ export function ContactForm() {
           />
         </label>
         <label className="grid gap-2 text-sm font-semibold">
-          Service required
-          <select
-            required
-            name="service"
-            defaultValue=""
-            className="min-h-12 rounded-[8px] border border-slate-300 bg-white px-4 text-base font-normal outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-200"
-          >
-            <option value="" disabled>
-              Select a service
-            </option>
-            {serviceOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="grid gap-2 text-sm font-semibold sm:col-span-2">
-          Suburb
+          Suburb *
           <input
             required
             name="suburb"
@@ -124,7 +89,25 @@ export function ContactForm() {
           />
         </label>
         <label className="grid gap-2 text-sm font-semibold sm:col-span-2">
-          Description of issue
+          Service *
+          <select
+            required
+            name="service"
+            defaultValue=""
+            className="min-h-12 rounded-[8px] border border-slate-300 bg-white px-4 text-base font-normal outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-200"
+          >
+            <option value="" disabled>
+              Select a service
+            </option>
+            {contactServices.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="grid gap-2 text-sm font-semibold sm:col-span-2">
+          Tell us what&apos;s happening *
           <textarea
             required
             name="message"
@@ -134,7 +117,37 @@ export function ContactForm() {
             className="rounded-[8px] border border-slate-300 px-4 py-3 text-base font-normal outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-200"
           />
         </label>
-      </div>
+        <label className="grid gap-2 text-sm font-semibold sm:col-span-2">
+          Device / Equipment
+          <input
+            name="device"
+            placeholder="Computer model, printer, router, camera, phone..."
+            className="min-h-12 rounded-[8px] border border-slate-300 px-4 text-base font-normal outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-200"
+          />
+        </label>
+        <label className="grid gap-2 text-sm font-semibold sm:col-span-2">
+          Add photos
+          <input
+            name="photos"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            className="rounded-[8px] border border-slate-300 px-4 py-3 text-base font-normal outline-none transition file:mr-4 file:rounded-full file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white focus:border-amber-500 focus:ring-4 focus:ring-amber-200"
+          />
+        </label>
+        <fieldset className="grid gap-3 sm:col-span-2">
+          <legend className="text-sm font-semibold">Preferred support</legend>
+          <div className="grid gap-2 sm:grid-cols-4">
+            {["On-site", "Remote", "Collection/drop-off", "Not sure"].map((option) => (
+              <label key={option} className="flex items-center gap-2 rounded-[8px] border border-slate-300 px-3 py-3 text-sm">
+                <input type="radio" name="preferredSupport" value={option} defaultChecked={option === "Not sure"} />
+                {option}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        </div>
+        {turnstileSiteKey ? <div className="cf-turnstile mt-5" data-sitekey={turnstileSiteKey} /> : null}
 
       <p className="mt-5 rounded-[8px] bg-amber-50 p-4 text-sm leading-6 text-slate-700">
         No problem is too simple to ask about. If you&apos;re unsure what service you need,
@@ -152,7 +165,7 @@ export function ContactForm() {
 
       {status === "success" ? (
         <p role="status" className="mt-4 text-sm font-semibold text-emerald-700">
-          Thanks. Your enquiry is ready to be sent through the configured form endpoint.
+          Thanks. Your enquiry has been received.
         </p>
       ) : null}
       {status === "error" ? (
@@ -160,6 +173,7 @@ export function ContactForm() {
           Something went wrong sending the form. Please try again, or use the contact details once they are added.
         </p>
       ) : null}
-    </form>
+      </form>
+    </>
   );
 }

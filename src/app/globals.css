@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #0f172a;
+  --background: #0d1220;
+  --foreground: #ffffff;
+  --midnight-navy: #0d1220;
+  --dark-navy: #182330;
+  --sunset-orange: #ff8a00;
+  --golden-orange: #ffa733;
+  --coral: #ff5e7d;
+  --purple: #7861ff;
+  --soft-grey: #e6e7eb;
 }
 
 @theme inline {
@@ -33,10 +40,29 @@ a {
 }
 
 ::selection {
-  background: #fbbf24;
-  color: #0f172a;
+  background: #ff8a00;
+  color: #0d1220;
 }
 
 details > summary::-webkit-details-marker {
   display: none;
+}
+
+button,
+input,
+select,
+textarea,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

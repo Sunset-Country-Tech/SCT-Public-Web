@@ -1,0 +1,20 @@
+export const business = {
+  name: "Sunset Country Tech",
+  tagline: "Technology problems solved locally.",
+  servicesLine: "Repairs • IT Support • Digital Literacy • Installations",
+  phone: "",
+  email: "",
+  website: "",
+  abn: "",
+  serviceRegion: "Mildura and Sunraysia",
+  suburbs: [
+    "Mildura",
+    "Irymple",
+    "Red Cliffs",
+    "Merbein",
+    "Nichols Point",
+    "Buronga",
+    "Gol Gol",
+    "Wentworth",
+  ],
+};
