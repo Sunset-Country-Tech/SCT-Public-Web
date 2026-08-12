@@ -9,7 +9,7 @@ Private operations app for Sunset Country Tech. This is an internal repair-manag
 - Prisma is the intended ORM layer for migrations and application queries.
 - Authentication is required for internal routes. The current implementation uses configured staff accounts, bcrypt password hashes, signed HTTP-only session cookies, CSRF protection on sign-in and role-based authorization helpers. Production should set `AUTH_SECRET` and `INTERNAL_USERS_JSON`.
 - Public access is limited to secure quote approval links under `/q/[token]`.
-- Uploaded files and generated PDFs should be stored outside the database. Cloudflare R2 is the preferred file store; PostgreSQL should hold metadata and access rules.
+- Uploaded files and generated PDFs should be stored outside the database. Use a provider-neutral file store and keep PostgreSQL focused on metadata and access rules.
 - Email, SMS, accounting and calendar are intentionally provider-neutral adapter layers so Hnry, Xero, MYOB, SMS-Gate, SMTP/API email and Google Calendar can be added later without coupling them to core job data.
 
 ## Required Environment
@@ -138,7 +138,7 @@ Implemented product surfaces:
 - Do not store customer passwords or network credentials in plain text. Add an encrypted credential vault only if there is a strong operational need.
 - Soft deletion is modelled for critical records.
 - Audit logs are modelled for critical changes.
-- Validate uploaded files and block executable formats before storing them in R2.
+- Validate uploaded files and block executable formats before storing them.
 
 ## Documents and PDFs
 
@@ -154,31 +154,24 @@ Server-side document generation should create branded A4 PDFs for:
 - 3D print order
 - data transfer authorisation
 
-Store generated files in R2 and save metadata in `GeneratedDocument`.
+Store generated files in the configured file store and save metadata in `GeneratedDocument`.
 
 ## Backups and Restore
 
 Back up:
 
 - PostgreSQL database using provider snapshots and scheduled logical dumps.
-- R2 bucket contents using bucket replication or scheduled object export.
+- uploaded file storage using provider snapshots, replication or scheduled object export.
 - application configuration and environment variable inventory without exposing secret values.
 
 Restore procedure:
 
 1. Restore PostgreSQL to a new database.
-2. Restore or reconnect R2 objects.
+2. Restore or reconnect uploaded file storage.
 3. Deploy the same app version.
 4. Recreate runtime secrets.
 5. Run smoke tests for login, job lookup, quote approval, invoice totals and document download.
 
-## Cloudflare Deployment
+## Deployment
 
-This project is configured for OpenAI Sites hosting with Cloudflare-oriented deployment. For a full production deployment outside Sites, prefer:
-
-- Cloudflare Pages or Workers for the Next app if the selected adapter supports the required runtime.
-- External PostgreSQL for relational data.
-- Cloudflare R2 for uploads and generated documents.
-- Cloudflare secrets for runtime credentials.
-
-Prefer PostgreSQL over D1 for this system because the requested data model is broad, relational and integration-heavy.
+This project now uses the standard Next.js build flow. Choose a hosting provider that supports the required Next.js runtime, then configure PostgreSQL, file storage and runtime secrets for that environment.

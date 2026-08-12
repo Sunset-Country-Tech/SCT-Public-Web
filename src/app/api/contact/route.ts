@@ -23,7 +23,7 @@ const schema = z.object({
 });
 
 function getClientKey(request: Request) {
-  return request.headers.get("cf-connecting-ip") ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
 }
 
 function checkRateLimit(key: string) {
@@ -40,26 +40,6 @@ function checkRateLimit(key: string) {
   return true;
 }
 
-async function validateTurnstile(token: FormDataEntryValue | null, request: Request) {
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) {
-    return true;
-  }
-  if (typeof token !== "string" || token.length < 10) {
-    return false;
-  }
-  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-    method: "POST",
-    body: new URLSearchParams({
-      secret,
-      response: token,
-      remoteip: getClientKey(request),
-    }),
-  });
-  const result = (await response.json()) as { success?: boolean };
-  return result.success === true;
-}
-
 export async function POST(request: Request) {
   const clientKey = getClientKey(request);
   if (!checkRateLimit(clientKey)) {
@@ -67,11 +47,6 @@ export async function POST(request: Request) {
   }
 
   const formData = await request.formData();
-  const turnstileOk = await validateTurnstile(formData.get("cf-turnstile-response"), request);
-  if (!turnstileOk) {
-    return Response.json({ ok: false, message: "Spam protection check failed." }, { status: 400 });
-  }
-
   const parsed = schema.safeParse(Object.fromEntries(formData.entries()));
   if (!parsed.success) {
     return Response.json({ ok: false, errors: parsed.error.flatten().fieldErrors }, { status: 400 });

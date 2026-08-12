@@ -160,7 +160,7 @@ const defaultOperationsSettings: OperationsSettings = {
   smsProvider: "none",
   accountingProvider: "none",
   calendarProvider: "none",
-  r2Bucket: "sunset-country-tech-files",
+  fileStorage: "local uploads",
 };
 
 export function OperationsApp({ sessionRole = "Owner" }: OperationsAppProps) {
@@ -233,7 +233,7 @@ export function OperationsApp({ sessionRole = "Owner" }: OperationsAppProps) {
           ))}
         </nav>
         <div className="border-t border-white/10 p-4 text-xs text-slate-300">
-          PostgreSQL + Prisma ready • R2 file storage ready • Provider-neutral integrations
+          PostgreSQL + Prisma ready • File storage ready • Provider-neutral integrations
         </div>
       </aside>
 

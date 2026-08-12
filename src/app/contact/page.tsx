@@ -17,7 +17,7 @@ export default function ContactPage() {
             <p>No physical shop address is listed because support is arranged around the job: on-site, remote, collection/drop-off or a digital literacy session.</p>
           </div>
         </div>
-        <ContactForm turnstileSiteKey={process.env.TURNSTILE_SITE_KEY} />
+        <ContactForm />
       </div>
     </section>
   );

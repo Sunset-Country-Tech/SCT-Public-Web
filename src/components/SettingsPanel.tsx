@@ -46,7 +46,7 @@ export type OperationsSettings = {
   smsProvider: string;
   accountingProvider: string;
   calendarProvider: string;
-  r2Bucket: string;
+  fileStorage: string;
 };
 
 type SettingsPanelProps = {
@@ -371,7 +371,7 @@ export function SettingsPanel({ settings, onChange, role }: SettingsPanelProps) 
               <Field label="SMS provider"><SelectInput disabled={!canWrite} value={settings.smsProvider} onChange={(event) => update("smsProvider", event.target.value)}><option>none</option><option>sms-gate</option><option>api</option></SelectInput></Field>
               <Field label="Accounting provider"><SelectInput disabled={!canWrite} value={settings.accountingProvider} onChange={(event) => update("accountingProvider", event.target.value)}><option>none</option><option>hnry-export</option><option>xero</option><option>myob</option><option>csv</option></SelectInput></Field>
               <Field label="Calendar provider"><SelectInput disabled={!canWrite} value={settings.calendarProvider} onChange={(event) => update("calendarProvider", event.target.value)}><option>none</option><option>google-calendar</option><option>outlook-calendar</option></SelectInput></Field>
-              <Field label="R2 bucket"><TextInput disabled={!canWrite} value={settings.r2Bucket} onChange={(event) => update("r2Bucket", event.target.value)} /></Field>
+              <Field label="File storage"><TextInput disabled={!canWrite} value={settings.fileStorage} onChange={(event) => update("fileStorage", event.target.value)} /></Field>
               <div className="rounded-[8px] bg-emerald-50 p-4 text-sm text-emerald-900">
                 <p className="font-black"><BadgeCheck className="mr-2 inline h-4 w-4" />Integration adapters stay decoupled</p>
                 <p className="mt-2">Changing provider settings here affects configuration only; API keys should remain environment secrets.</p>

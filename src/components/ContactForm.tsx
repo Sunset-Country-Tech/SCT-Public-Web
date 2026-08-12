@@ -2,12 +2,11 @@
 
 import { FormEvent, useState } from "react";
 import { Send } from "lucide-react";
-import Script from "next/script";
 import { contactServices } from "@/lib/site-data";
 
 type FormStatus = "idle" | "success" | "error";
 
-export function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: string }) {
+export function ContactForm() {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,12 +38,10 @@ export function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: string })
   }
 
   return (
-    <>
-      {turnstileSiteKey ? <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" /> : null}
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-[8px] border border-white/10 bg-white p-6 text-slate-950 shadow-2xl shadow-black/30"
-      >
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-[8px] border border-white/10 bg-white p-6 text-slate-950 shadow-2xl shadow-black/30"
+    >
         <input type="text" name="companyWebsite" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
         <div className="grid gap-5 sm:grid-cols-2">
         <label className="grid gap-2 text-sm font-semibold">
@@ -147,7 +144,6 @@ export function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: string })
           </div>
         </fieldset>
         </div>
-        {turnstileSiteKey ? <div className="cf-turnstile mt-5" data-sitekey={turnstileSiteKey} /> : null}
 
       <p className="mt-5 rounded-[8px] bg-amber-50 p-4 text-sm leading-6 text-slate-700">
         No problem is too simple to ask about. If you&apos;re unsure what service you need,
@@ -173,7 +169,6 @@ export function ContactForm({ turnstileSiteKey }: { turnstileSiteKey?: string })
           Something went wrong sending the form. Please try again, or use the contact details once they are added.
         </p>
       ) : null}
-      </form>
-    </>
+    </form>
   );
 }
