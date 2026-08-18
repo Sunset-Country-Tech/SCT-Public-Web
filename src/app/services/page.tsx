@@ -1,4 +1,4 @@
-import { CTASection, HowItWorks, ServicesGrid } from "@/components/MarketingSections";
+import { CTASection, HowItWorks, PageHero, ServicesGrid, SupportMethods } from "@/components/MarketingSections";
 import { serviceGroups } from "@/lib/site-data";
 
 export const metadata = {
@@ -9,13 +9,11 @@ export const metadata = {
 export default function ServicesPage() {
   return (
     <>
-      <section className="relative overflow-hidden bg-[#0D1220] px-4 py-20 text-white sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.28em] text-[var(--sunset-orange)]">Services</p>
-          <h1 className="max-w-4xl text-balance text-5xl font-bold sm:text-6xl">Fixing, setting up, explaining and improving technology.</h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Sunset Country Tech provides practical technology help for individuals, families, seniors, students, home users and small businesses.</p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Services"
+        title="Fixing, setting up, explaining and improving technology."
+        copy="Practical technology help for individuals, families, seniors, students, home users and small businesses across Mildura and Sunraysia."
+      />
       <ServicesGrid compact />
       <section className="bg-slate-50 px-4 py-20 text-slate-950 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2">
@@ -29,6 +27,7 @@ export default function ServicesPage() {
           ))}
         </div>
       </section>
+      <SupportMethods />
       <HowItWorks />
       <CTASection />
     </>

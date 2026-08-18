@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     images: ["/og.png"],
   },
   icons: {
-    icon: "/brand/favicon.svg",
+    icon: "/brand/provided-logo-icon.png",
   },
 };
 

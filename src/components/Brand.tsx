@@ -1,14 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
-
-type IconType = LucideIcon;
 
 export function Logo({ stacked = false }: { stacked?: boolean }) {
   return (
     <Link href="/" className="inline-flex items-center rounded-[8px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--sunset-orange)]" aria-label="Sunset Country Tech home">
-      <Image src={stacked ? "/brand/logo-stacked.svg" : "/brand/logo-horizontal.svg"} alt="Sunset Country Tech" width={stacked ? 220 : 420} height={stacked ? 245 : 128} className={stacked ? "h-40 w-auto" : "h-14 w-auto sm:h-16"} priority={!stacked} />
+      <Image src={stacked ? "/brand/provided-logo-stacked.png" : "/brand/provided-logo-horizontal.png"} alt="Sunset Country Tech" width={stacked ? 314 : 1148} height={stacked ? 384 : 372} className={stacked ? "h-40 w-auto" : "h-14 w-auto sm:h-16"} priority={!stacked} />
     </Link>
   );
 }
@@ -34,10 +31,10 @@ export function SectionHeading({ eyebrow, title, copy }: { eyebrow?: string; tit
   );
 }
 
-export function ServiceIcon({ icon: Icon, label }: { icon: IconType; label?: string }) {
+export function ServiceIcon({ icon, label }: { icon: string; label?: string }) {
   return (
-    <span className="inline-flex h-13 w-13 items-center justify-center rounded-[8px] border border-white/10 bg-white/[0.03]">
-      <Icon aria-hidden={!label} aria-label={label} className="h-7 w-7 stroke-[1.8] text-[var(--sunset-orange)] [filter:drop-shadow(8px_6px_0_rgba(120,97,255,.24))]" />
+    <span className="inline-flex h-14 w-14 items-center justify-center rounded-[8px] border border-white/10 bg-white/[0.03]">
+      <Image src={icon} alt={label ?? ""} aria-hidden={label ? undefined : true} width={96} height={96} className="h-11 w-11 object-contain" />
     </span>
   );
 }

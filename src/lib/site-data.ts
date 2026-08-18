@@ -1,20 +1,3 @@
-import {
-  BookOpenCheck,
-  BriefcaseBusiness,
-  Camera,
-  Cpu,
-  GraduationCap,
-  HardDrive,
-  Home,
-  MonitorCog,
-  Network,
-  Printer,
-  Router,
-  ShieldCheck,
-  Sparkles,
-  Wrench,
-} from "lucide-react";
-
 export const navItems = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
@@ -26,18 +9,18 @@ export const navItems = [
 ];
 
 export const serviceCards = [
-  { title: "Computer Repairs", description: "Desktop, laptop, software and hardware troubleshooting.", icon: Wrench },
-  { title: "Computer Upgrades", description: "SSD, RAM, storage and performance improvements.", icon: HardDrive },
-  { title: "PC Builds", description: "Custom builds, gaming upgrades and practical component advice.", icon: Cpu },
-  { title: "Home Tech Support", description: "Friendly help with devices, accounts, email and setup.", icon: Home },
-  { title: "Wi-Fi & Networking", description: "Routers, mesh Wi-Fi, Ethernet and coverage problems.", icon: Router },
-  { title: "Printers", description: "Printer setup, connection problems, scanning and troubleshooting.", icon: Printer },
-  { title: "Security Cameras", description: "Camera, smart doorbell and basic home security setup.", icon: Camera },
-  { title: "Smart Home", description: "Smart devices, streaming gear and Home Assistant support.", icon: MonitorCog },
-  { title: "Digital Literacy", description: "One-on-one technology help at your own pace.", icon: GraduationCap },
-  { title: "Business IT", description: "Everyday IT support for small local businesses.", icon: BriefcaseBusiness },
-  { title: "3D Printing", description: "Custom clips, brackets, mounts, enclosures and prototypes.", icon: Sparkles },
-  { title: "Remote Support", description: "Help from a distance when an on-site visit is not needed.", icon: Network },
+  { title: "Computer Repairs", description: "Laptop and desktop repairs, slow computers, Windows issues and practical fault finding.", icon: "/brand/icon-repairs.png", href: "/services#repairs" },
+  { title: "Computer Upgrades", description: "SSD, RAM, storage and performance upgrades that make older machines feel useful again.", icon: "/brand/icon-computers.png", href: "/services#repairs" },
+  { title: "PC Builds", description: "Custom builds, gaming upgrades and component advice without upselling what you do not need.", icon: "/brand/icon-computers.png", href: "/services#repairs" },
+  { title: "Home Tech Support", description: "Friendly help with devices, accounts, email, file transfers, backups and new setup.", icon: "/brand/icon-it-support.png", href: "/services#it-support" },
+  { title: "Wi-Fi & Networking", description: "Routers, mesh Wi-Fi, Ethernet, coverage issues and devices that will not stay connected.", icon: "/brand/icon-networking.png", href: "/services#installations" },
+  { title: "Printers", description: "Printer setup, connection problems, scanning, sharing and everyday troubleshooting.", icon: "/brand/icon-printers.png", href: "/services#it-support" },
+  { title: "Security Cameras", description: "Security camera, smart doorbell and basic home monitoring setup by arrangement.", icon: "/brand/icon-security.png", href: "/services#installations" },
+  { title: "Smart Home", description: "Smart devices, streaming boxes, doorbells, sensors and Home Assistant support.", icon: "/brand/icon-smart-home.png", href: "/services#installations" },
+  { title: "Digital Literacy", description: "One-on-one technology help at your own pace, with no tests and no judgement.", icon: "/brand/icon-tutoring.png", href: "/digital-literacy" },
+  { title: "Business IT", description: "Everyday IT support for small local businesses that just need things working.", icon: "/brand/icon-it-support.png", href: "/business-it" },
+  { title: "3D Printing", description: "Custom clips, brackets, mounts, enclosures, prototypes and replacement plastic parts.", icon: "/brand/icon-3d-printing.png", href: "/3d-printing" },
+  { title: "Remote Support", description: "Help from a distance when a visit is not needed and the issue can be handled online.", icon: "/brand/icon-networking.png", href: "/services#it-support" },
 ];
 
 export const pillarCards = [
@@ -47,7 +30,7 @@ export const pillarCards = [
     items: ["Laptop and desktop repairs", "Slow computers", "SSD and RAM upgrades", "Software issues", "PC repairs"],
     href: "/services#repairs",
     cta: "Repair Services",
-    icon: Wrench,
+    icon: "/brand/icon-repairs.png",
   },
   {
     label: "SET IT UP",
@@ -55,7 +38,7 @@ export const pillarCards = [
     items: ["Computers", "Printers", "Wi-Fi", "Routers", "Cameras", "Smart devices"],
     href: "/services#installations",
     cta: "Setup & Installation",
-    icon: Router,
+    icon: "/brand/icon-installations.png",
   },
   {
     label: "LEARN IT",
@@ -63,7 +46,7 @@ export const pillarCards = [
     items: ["Computer basics", "Email", "Internet", "Online safety", "Smartphones", "Digital skills"],
     href: "/digital-literacy",
     cta: "Digital Literacy",
-    icon: BookOpenCheck,
+    icon: "/brand/icon-tutoring.png",
   },
   {
     label: "IMPROVE IT",
@@ -71,8 +54,38 @@ export const pillarCards = [
     items: ["PC upgrades", "Better Wi-Fi", "Networking", "Custom setups", "3D printing"],
     href: "/services#solutions",
     cta: "Explore Solutions",
-    icon: ShieldCheck,
+    icon: "/brand/icon-networking.png",
   },
+];
+
+export const customerNeeds = [
+  {
+    title: "Something is broken",
+    copy: "A laptop will not start, a printer has vanished, Windows is playing up, or the computer has become painfully slow.",
+    action: "Repair and troubleshooting help",
+  },
+  {
+    title: "Something needs setting up",
+    copy: "A new computer, router, printer, camera, phone, tablet or smart device is useful only after it is actually working.",
+    action: "Setup and installation support",
+  },
+  {
+    title: "Something is confusing",
+    copy: "Email, files, passwords, forms, phones and online services can be learned calmly, one practical step at a time.",
+    action: "Digital literacy sessions",
+  },
+  {
+    title: "Something could work better",
+    copy: "Wi-Fi can reach further, old PCs can be upgraded, small businesses can tidy their setup, and custom parts can be printed.",
+    action: "Improvement and custom solutions",
+  },
+];
+
+export const supportMethods = [
+  ["On-site", "For setup, Wi-Fi, printers, cameras, business visits and jobs that need hands-on access."],
+  ["Remote", "For suitable software, email, account, setup and troubleshooting issues."],
+  ["Drop-off or collection", "By arrangement when a device needs bench time, parts or a more careful diagnostic."],
+  ["Learning sessions", "Patient one-on-one help for people who want to understand what they are doing."],
 ];
 
 export const faqs = [
@@ -111,7 +124,6 @@ export const literacyGroups: Array<[string, string[]]> = [
   ["Staying Safe Online", ["Passwords", "MFA", "Scam awareness", "Suspicious emails", "Remote access scams", "Updates", "Backups"]],
   ["Everyday Technology", ["Smartphones", "Tablets", "Photos", "Printing", "Scanning", "Cloud storage", "Online services"]],
   ["Productivity", ["Word", "Excel", "PowerPoint"]],
-  ["More Technical Skills", ["PC building", "Networking", "3D printing", "CAD", "Beginner coding"]],
 ];
 
 export const serviceGroups: Array<[string, string[]]> = [
@@ -119,4 +131,10 @@ export const serviceGroups: Array<[string, string[]]> = [
   ["IT Support", ["New computer setup", "Printer setup", "Email setup", "Software installation", "File transfers", "Backup setup", "Remote support", "Home visits", "Small business support"]],
   ["Installations", ["Wi-Fi setup", "Mesh Wi-Fi", "Router setup", "Ethernet", "Home networking", "Security camera setup", "Smart doorbells", "Smart home devices", "Streaming devices"]],
   ["3D Printing", ["Custom parts", "Replacement clips", "Brackets", "Mounts", "Small enclosures", "Prototypes", "Technology accessories", "Basic CAD design"]],
+];
+
+export const businessItNeeds: Array<[string, string[]]> = [
+  ["Everyday support", ["PCs", "Printers", "Email", "Microsoft 365 help", "Google Workspace help", "Device setup"]],
+  ["Site technology", ["Wi-Fi", "Routers", "Networking", "Backups", "Technology installations", "On-site troubleshooting"]],
+  ["Basic security", ["Password hygiene", "Multi-factor authentication", "Updates", "Backup checks", "Suspicious email advice", "Safer remote access habits"]],
 ];

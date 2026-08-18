@@ -1,13 +1,17 @@
-import { CTASection, FAQSection, Hero, HowItWorks, Pillars, ServiceAreaPreview, ServicesGrid } from "@/components/MarketingSections";
+import { CTASection, CustomerNeeds, FAQSection, Hero, HowItWorks, NoFakeReviewsNotice, Pillars, ServiceAreaPreview, ServicesGrid, SupportMethods, TrustStrip } from "@/components/MarketingSections";
 
 export default function Home() {
   return (
     <>
       <Hero />
+      <TrustStrip />
+      <CustomerNeeds />
       <Pillars />
       <ServicesGrid />
-      <HowItWorks />
+      <SupportMethods />
       <ServiceAreaPreview />
+      <HowItWorks />
+      <NoFakeReviewsNotice />
       <FAQSection />
       <CTASection />
     </>

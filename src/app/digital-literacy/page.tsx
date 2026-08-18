@@ -1,4 +1,4 @@
-import { CTASection } from "@/components/MarketingSections";
+import { CTASection, PageHero } from "@/components/MarketingSections";
 import { literacyGroups } from "@/lib/site-data";
 
 export const metadata = {
@@ -9,16 +9,20 @@ export const metadata = {
 export default function DigitalLiteracyPage() {
   return (
     <>
-      <section className="bg-[#0D1220] px-4 py-20 text-white sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <p className="mb-3 text-xs font-bold uppercase tracking-[0.28em] text-[var(--sunset-orange)]">Digital Literacy</p>
-          <h1 className="max-w-4xl text-balance text-5xl font-bold sm:text-6xl">Feel more confident with technology.</h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">Whether you&apos;re learning the basics, using a new device or trying to stay safer online, Sunset Country Tech can help you build practical technology skills at your own pace.</p>
+      <PageHero
+        eyebrow="Digital Literacy"
+        title="Feel more confident with technology."
+        copy="Whether you're learning the basics, using a new device or trying to stay safer online, Sunset Country Tech can help you build practical technology skills at your own pace."
+      >
           <p className="mt-6 inline-flex rounded-full border border-white/15 bg-white/[0.04] px-5 py-3 font-bold text-white">No tests. No judgement. No unnecessary jargon.</p>
-        </div>
-      </section>
+      </PageHero>
       <section className="bg-slate-50 px-4 py-20 text-slate-950 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-7xl gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mx-auto max-w-7xl">
+          <div className="max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[var(--sunset-orange)]">What you can learn</p>
+            <h2 className="mt-3 text-3xl font-bold">Everyday skills, taught calmly and practically.</h2>
+          </div>
+        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {literacyGroups.map(([title, items]) => (
             <article key={title} className="rounded-[8px] border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-2xl font-bold">{title}</h2>
@@ -27,6 +31,7 @@ export default function DigitalLiteracyPage() {
               </ul>
             </article>
           ))}
+        </div>
         </div>
       </section>
       <CTASection />
