@@ -10,10 +10,9 @@ The site presents local technology services across Mildura and Sunraysia, includ
 - React 19
 - TypeScript
 - Tailwind CSS
-- Prisma schema for protected operations data
 - Docker-compatible standalone Next.js output
 
-## Public Routes
+## Routes
 
 - `/`
 - `/services`
@@ -26,21 +25,13 @@ The site presents local technology services across Mildura and Sunraysia, includ
 - `/privacy`
 - `/terms`
 
-The app also contains protected internal operations routes and secure quote approval routes:
-
-- `/operations`
-- `/login`
-- `/q/[token]`
-
 ## Required Environment
 
 Copy `.env.example` into `.env.local` for local development and set:
 
 - `NEXT_PUBLIC_SITE_URL`
-- `DATABASE_URL`
-- `AUTH_SECRET`
-- `INTERNAL_USERS_JSON`
-- file, email, SMS, accounting and calendar provider values as integrations are enabled
+- `INTERNAL_INTAKE_API_URL`
+- `PUBLIC_INTAKE_SECRET`
 
 Do not commit real secrets.
 
@@ -82,59 +73,72 @@ Build the production image:
 docker build -t sunset-country-tech .
 ```
 
-Run the app image directly:
+Run the app image directly on host port `3001`:
 
 ```bash
-docker run --rm -p 3000:3000 \
-  -e NEXT_PUBLIC_SITE_URL=http://localhost:3000 \
-  -e DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/sunset_country_tech \
-  -e AUTH_SECRET=replace-with-a-long-random-secret \
-  -e INTERNAL_USERS_JSON='[{"id":"owner","email":"owner@sunsetcountry.tech","name":"Owner","role":"Owner","passwordHash":"$2b$12$replace-with-bcrypt-hash"}]' \
+docker run --rm -p 3001:3000 \
+  -e NEXT_PUBLIC_SITE_URL=http://localhost:3001 \
+  -e INTERNAL_INTAKE_API_URL=https://internal.example.com/api/public-contact-intake \
+  -e PUBLIC_INTAKE_SECRET=replace-with-shared-secret \
   sunset-country-tech
 ```
 
-Run the app with a local PostgreSQL container:
+Run with Docker Compose:
 
 ```bash
 docker compose up --build
 ```
 
-The compose file is intended for local container testing only. Replace `AUTH_SECRET`, `INTERNAL_USERS_JSON` and database credentials before production use.
+Compose serves the site at:
 
-## Database
-
-The Prisma schema lives in `prisma/schema.prisma`. It models the protected operations system behind the public website, including users, customers, jobs, quotes, invoices, appointments, communications, Digital Literacy profiles and 3D printing jobs.
-
-Generate Prisma client:
-
-```bash
-npx prisma generate
+```text
+http://localhost:3001
 ```
 
-Apply local development migrations:
+The compose setup starts only the public web container.
+
+Set these variables before running Compose when you want contact form submissions to reach the internal app:
 
 ```bash
-npx prisma migrate dev
+INTERNAL_INTAKE_API_URL=https://internal.example.com/api/public-contact-intake
+PUBLIC_INTAKE_SECRET=replace-with-shared-secret
+docker compose up --build
 ```
 
-Apply production migrations:
+## Contact Intake Integration
 
-```bash
-npx prisma migrate deploy
+The browser submits the contact form to the public site at `POST /api/contact`. That public endpoint validates the form, checks the honeypot and file limits, then forwards the original `multipart/form-data` request to `INTERNAL_INTAKE_API_URL`.
+
+The forwarded request includes:
+
+- `x-sct-public-intake-secret: <PUBLIC_INTAKE_SECRET>`
+- `x-sct-public-source: sunset-country-tech-public-web`
+- `x-forwarded-for: <client-ip>`
+
+Expected internal endpoint:
+
+```text
+POST /api/public-contact-intake
 ```
 
-Generate production staff password hashes:
+Required forwarded form fields:
 
-```bash
-npm run auth:hash-password -- "a-long-temporary-password"
-```
+- `name`
+- `email`
+- `phone`
+- `suburb`
+- `service`
+- `message`
+- `device`
+- `preferredSupport`
+- `photos`
+- `companyWebsite`
 
-Put the resulting hash in each `INTERNAL_USERS_JSON` user record.
+If `INTERNAL_INTAKE_API_URL` or `PUBLIC_INTAKE_SECRET` is missing, `/api/contact` returns a safe `503` response instead of silently dropping the enquiry.
 
 ## Deployment Notes
 
 - `next.config.ts` uses `output: "standalone"` for Docker and self-hosted Node deployments.
 - `Dockerfile` copies `public` and `.next/static` into the runtime image so static assets and optimized brand images are available.
 - Set `NEXT_PUBLIC_SITE_URL` to the public production URL before building/deploying.
-- Configure real production values for `AUTH_SECRET`, `INTERNAL_USERS_JSON` and `DATABASE_URL`.
-- Run Prisma migrations before using protected operations routes in production.
+- Set `INTERNAL_INTAKE_API_URL` and `PUBLIC_INTAKE_SECRET` so contact enquiries are delivered to the internal app.

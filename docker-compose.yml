@@ -3,43 +3,11 @@ services:
     build:
       context: .
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/sunset_country_tech
-      AUTH_SECRET: replace-with-a-long-random-secret-for-local-docker
-      INTERNAL_USERS_JSON: '[{"id":"owner","email":"owner@sunsetcountry.tech","name":"Owner","role":"Owner","passwordHash":"$$2b$$12$$AaTOUWJQBb1KpyNpA0uOlurGrPr43.67hJpHCFI/vUx734nNy.1.i"}]'
-      FILE_STORAGE_PROVIDER: local
-      FILE_STORAGE_PATH: /app/storage/uploads
-      EMAIL_PROVIDER: none
-      SMS_PROVIDER: none
-      ACCOUNTING_PROVIDER: none
-      GOOGLE_CALENDAR_PROVIDER: none
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - uploads:/app/storage/uploads
-
-  db:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: sunset_country_tech
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d sunset_country_tech"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
-volumes:
-  postgres-data:
-  uploads:
+      NEXT_PUBLIC_SITE_URL: http://localhost:3001
+      INTERNAL_INTAKE_API_URL: ${INTERNAL_INTAKE_API_URL:-}
+      PUBLIC_INTAKE_SECRET: ${PUBLIC_INTAKE_SECRET:-}

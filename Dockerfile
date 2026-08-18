@@ -14,9 +14,6 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 RUN npm ci
 
-COPY prisma ./prisma
-RUN npx prisma generate
-
 FROM base AS builder
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -36,7 +33,6 @@ RUN groupadd --system --gid 1001 nodejs \
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
 USER nextjs
 

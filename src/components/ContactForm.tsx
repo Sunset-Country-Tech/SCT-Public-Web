@@ -8,12 +8,14 @@ type FormStatus = "idle" | "success" | "error";
 
 export function ContactForm() {
   const [status, setStatus] = useState<FormStatus>("idle");
+  const [statusMessage, setStatusMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
     setStatus("idle");
+    setStatusMessage("");
 
     const form = event.currentTarget;
     const formData = new FormData(form);
@@ -23,14 +25,17 @@ export function ContactForm() {
         headers: { Accept: "application/json" },
         body: formData,
       });
+      const payload = await response.json().catch(() => null) as { message?: string } | null;
 
       if (!response.ok) {
-        throw new Error("Form submission failed");
+        throw new Error(payload?.message ?? "Form submission failed");
       }
 
+      setStatusMessage(payload?.message ?? "Thanks. Your enquiry has been received.");
       setStatus("success");
       form.reset();
-    } catch {
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : "Something went wrong sending the form. Please try again.");
       setStatus("error");
     } finally {
       setIsSubmitting(false);
@@ -161,12 +166,12 @@ export function ContactForm() {
 
       {status === "success" ? (
         <p role="status" className="mt-4 text-sm font-semibold text-emerald-700">
-          Thanks. Your enquiry has been received.
+          {statusMessage}
         </p>
       ) : null}
       {status === "error" ? (
         <p role="alert" className="mt-4 text-sm font-semibold text-red-700">
-          Something went wrong sending the form. Please try again, or use the contact details once they are added.
+          {statusMessage}
         </p>
       ) : null}
     </form>

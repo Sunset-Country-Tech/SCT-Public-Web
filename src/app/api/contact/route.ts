@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { contactServices } from "@/lib/site-data";
 
 export const runtime = "nodejs";
@@ -10,17 +9,10 @@ const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 5;
 const rateLimit = new Map<string, { count: number; resetAt: number }>();
 
-const schema = z.object({
-  name: z.string().trim().min(2).max(120),
-  email: z.email().max(180),
-  phone: z.string().trim().max(40).optional(),
-  suburb: z.string().trim().min(2).max(80),
-  service: z.enum(contactServices as [string, ...string[]]),
-  message: z.string().trim().min(15).max(4000),
-  device: z.string().trim().max(180).optional(),
-  preferredSupport: z.enum(["On-site", "Remote", "Collection/drop-off", "Not sure"]),
-  companyWebsite: z.string().max(0).optional(),
-});
+const INTERNAL_INTAKE_API_URL = process.env.INTERNAL_INTAKE_API_URL;
+const PUBLIC_INTAKE_SECRET = process.env.PUBLIC_INTAKE_SECRET;
+const preferredSupportOptions = new Set(["On-site", "Remote", "Collection/drop-off", "Not sure"]);
+const serviceOptions = new Set(contactServices);
 
 function getClientKey(request: Request) {
   return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
@@ -40,6 +32,90 @@ function checkRateLimit(key: string) {
   return true;
 }
 
+function getText(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function validateContactForm(formData: FormData) {
+  const values = {
+    name: getText(formData, "name"),
+    email: getText(formData, "email"),
+    phone: getText(formData, "phone"),
+    suburb: getText(formData, "suburb"),
+    service: getText(formData, "service"),
+    message: getText(formData, "message"),
+    device: getText(formData, "device"),
+    preferredSupport: getText(formData, "preferredSupport"),
+    companyWebsite: getText(formData, "companyWebsite"),
+  };
+  const errors: Record<string, string[]> = {};
+
+  const addError = (field: string, message: string) => {
+    errors[field] = [...(errors[field] ?? []), message];
+  };
+
+  if (values.companyWebsite) addError("companyWebsite", "Invalid submission.");
+  if (values.name.length < 2 || values.name.length > 120) addError("name", "Enter a valid name.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email) || values.email.length > 180) addError("email", "Enter a valid email address.");
+  if (values.phone.length > 40) addError("phone", "Phone number is too long.");
+  if (values.suburb.length < 2 || values.suburb.length > 80) addError("suburb", "Enter a valid suburb.");
+  if (!serviceOptions.has(values.service)) addError("service", "Choose a valid service.");
+  if (values.message.length < 15 || values.message.length > 4000) addError("message", "Message must be between 15 and 4000 characters.");
+  if (values.device.length > 180) addError("device", "Device details are too long.");
+  if (!preferredSupportOptions.has(values.preferredSupport)) addError("preferredSupport", "Choose a valid support option.");
+
+  return { success: Object.keys(errors).length === 0, errors };
+}
+
+async function forwardToInternalIntake(formData: FormData, request: Request) {
+  if (!INTERNAL_INTAKE_API_URL || !PUBLIC_INTAKE_SECRET) {
+    return {
+      ok: false,
+      status: 503,
+      message: "Enquiries are not connected yet. Please try again later.",
+    };
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
+
+  try {
+    const response = await fetch(INTERNAL_INTAKE_API_URL, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "x-sct-public-intake-secret": PUBLIC_INTAKE_SECRET,
+        "x-sct-public-source": "sunset-country-tech-public-web",
+        "x-forwarded-for": getClientKey(request),
+      },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        status: response.status >= 400 && response.status < 500 ? 400 : 502,
+        message: "The enquiry could not be sent. Please try again shortly.",
+      };
+    }
+
+    return {
+      ok: true,
+      status: 200,
+      message: "Enquiry received.",
+    };
+  } catch {
+    return {
+      ok: false,
+      status: 502,
+      message: "The enquiry could not be sent. Please try again shortly.",
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function POST(request: Request) {
   const clientKey = getClientKey(request);
   if (!checkRateLimit(clientKey)) {
@@ -47,9 +123,9 @@ export async function POST(request: Request) {
   }
 
   const formData = await request.formData();
-  const parsed = schema.safeParse(Object.fromEntries(formData.entries()));
+  const parsed = validateContactForm(formData);
   if (!parsed.success) {
-    return Response.json({ ok: false, errors: parsed.error.flatten().fieldErrors }, { status: 400 });
+    return Response.json({ ok: false, errors: parsed.errors }, { status: 400 });
   }
 
   const files = formData.getAll("photos").filter((file): file is File => file instanceof File && file.size > 0);
@@ -62,8 +138,6 @@ export async function POST(request: Request) {
     }
   }
 
-  return Response.json({
-    ok: true,
-    message: "Enquiry received.",
-  });
+  const forwarded = await forwardToInternalIntake(formData, request);
+  return Response.json({ ok: forwarded.ok, message: forwarded.message }, { status: forwarded.status });
 }
