@@ -32,6 +32,8 @@ Copy `.env.example` into `.env.local` for local development and set:
 - `NEXT_PUBLIC_SITE_URL`
 - `INTERNAL_INTAKE_API_URL`
 - `PUBLIC_INTAKE_SECRET`
+- `SCT_INTERNAL_INTAKE_URL`
+- `SCT_PUBLIC_INTAKE_SECRET`
 
 Do not commit real secrets.
 
@@ -105,9 +107,16 @@ PUBLIC_INTAKE_SECRET=replace-with-shared-secret
 docker compose up --build
 ```
 
+The route also accepts these alias names if you copied them from the internal app instructions:
+
+```bash
+SCT_INTERNAL_INTAKE_URL=https://INTERNAL_DOMAIN/api/public-contact-intake
+SCT_PUBLIC_INTAKE_SECRET=same-secret-as-internal-PUBLIC_INTAKE_SECRET
+```
+
 ## Contact Intake Integration
 
-The browser submits the contact form to the public site at `POST /api/contact`. That public endpoint validates the form, checks the honeypot and file limits, then forwards the original `multipart/form-data` request to `INTERNAL_INTAKE_API_URL`.
+The browser submits the contact form to the public site at `POST /api/contact`. The form also has plain HTML fallback attributes: `action="/api/contact"`, `method="post"` and `encType="multipart/form-data"`. That public endpoint validates the form, checks the honeypot and file limits, then forwards the original `multipart/form-data` request to `INTERNAL_INTAKE_API_URL` or `SCT_INTERNAL_INTAKE_URL`.
 
 The forwarded request includes:
 
@@ -134,11 +143,11 @@ Required forwarded form fields:
 - `photos`
 - `companyWebsite`
 
-If `INTERNAL_INTAKE_API_URL` or `PUBLIC_INTAKE_SECRET` is missing, `/api/contact` returns a safe `503` response instead of silently dropping the enquiry.
+If the intake URL or shared secret is missing, `/api/contact` returns a safe `503` response instead of silently dropping the enquiry.
 
 ## Deployment Notes
 
 - `next.config.ts` uses `output: "standalone"` for Docker and self-hosted Node deployments.
 - `Dockerfile` copies `public` and `.next/static` into the runtime image so static assets and optimized brand images are available.
 - Set `NEXT_PUBLIC_SITE_URL` to the public production URL before building/deploying.
-- Set `INTERNAL_INTAKE_API_URL` and `PUBLIC_INTAKE_SECRET` so contact enquiries are delivered to the internal app.
+- Set `INTERNAL_INTAKE_API_URL` and `PUBLIC_INTAKE_SECRET`, or the `SCT_*` aliases, so contact enquiries are delivered to the internal app.

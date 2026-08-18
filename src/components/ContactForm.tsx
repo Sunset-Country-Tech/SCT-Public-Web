@@ -5,6 +5,14 @@ import { Send } from "lucide-react";
 import { contactServices } from "@/lib/site-data";
 
 type FormStatus = "idle" | "success" | "error";
+type ContactResponse = { message?: string; errors?: Record<string, string[]> };
+
+function summarizeErrors(errors: ContactResponse["errors"]) {
+  if (!errors) {
+    return "";
+  }
+  return Object.values(errors).flat().join(" ");
+}
 
 export function ContactForm() {
   const [status, setStatus] = useState<FormStatus>("idle");
@@ -25,10 +33,11 @@ export function ContactForm() {
         headers: { Accept: "application/json" },
         body: formData,
       });
-      const payload = await response.json().catch(() => null) as { message?: string } | null;
+      const payload = await response.json().catch(() => null) as ContactResponse | null;
 
       if (!response.ok) {
-        throw new Error(payload?.message ?? "Form submission failed");
+        const errorMessage = (payload?.message ?? summarizeErrors(payload?.errors)) || "Form submission failed. Please check the highlighted fields and try again.";
+        throw new Error(errorMessage);
       }
 
       setStatusMessage(payload?.message ?? "Thanks. Your enquiry has been received.");
@@ -44,6 +53,9 @@ export function ContactForm() {
 
   return (
     <form
+      action="/api/contact"
+      method="post"
+      encType="multipart/form-data"
       onSubmit={handleSubmit}
       className="rounded-[8px] border border-white/10 bg-white p-6 text-slate-950 shadow-2xl shadow-black/30"
     >
