@@ -9,8 +9,6 @@ const WINDOW_MS = 60_000;
 const MAX_REQUESTS = 5;
 const rateLimit = new Map<string, { count: number; resetAt: number }>();
 
-const INTERNAL_INTAKE_API_URL = process.env.INTERNAL_INTAKE_API_URL;
-const PUBLIC_INTAKE_SECRET = process.env.PUBLIC_INTAKE_SECRET;
 const preferredSupportOptions = new Set(["On-site", "Remote", "Collection/drop-off", "Not sure"]);
 const serviceOptions = new Set(contactServices);
 
@@ -69,11 +67,14 @@ function validateContactForm(formData: FormData) {
 }
 
 async function forwardToInternalIntake(formData: FormData, request: Request) {
-  if (!INTERNAL_INTAKE_API_URL || !PUBLIC_INTAKE_SECRET) {
+  const intakeUrl = process.env.INTERNAL_INTAKE_API_URL || process.env.SCT_INTERNAL_INTAKE_URL;
+  const intakeSecret = process.env.PUBLIC_INTAKE_SECRET || process.env.SCT_PUBLIC_INTAKE_SECRET;
+
+  if (!intakeUrl || !intakeSecret) {
     return {
       ok: false,
       status: 503,
-      message: "Enquiries are not connected yet. Please try again later.",
+      message: "Enquiries are not connected yet. Please call or email Sunset Country Tech directly.",
     };
   }
 
@@ -81,29 +82,31 @@ async function forwardToInternalIntake(formData: FormData, request: Request) {
   const timeout = setTimeout(() => controller.abort(), 15_000);
 
   try {
-    const response = await fetch(INTERNAL_INTAKE_API_URL, {
+    const response = await fetch(intakeUrl, {
       method: "POST",
       body: formData,
       headers: {
-        "x-sct-public-intake-secret": PUBLIC_INTAKE_SECRET,
+        "x-sct-public-intake-secret": intakeSecret,
         "x-sct-public-source": "sunset-country-tech-public-web",
         "x-forwarded-for": getClientKey(request),
       },
       signal: controller.signal,
     });
 
+    const payload = await response.json().catch(() => null) as { message?: string } | null;
+
     if (!response.ok) {
       return {
         ok: false,
         status: response.status >= 400 && response.status < 500 ? 400 : 502,
-        message: "The enquiry could not be sent. Please try again shortly.",
+        message: payload?.message ?? "The enquiry could not be sent. Please try again shortly.",
       };
     }
 
     return {
       ok: true,
       status: 200,
-      message: "Enquiry received.",
+      message: payload?.message ?? "Enquiry received.",
     };
   } catch {
     return {
