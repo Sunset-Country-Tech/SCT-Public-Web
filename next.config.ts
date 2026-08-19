@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/(.*)",
+        source: "/((?!contact-embed$).*)",
         headers: [
           {
             key: "X-Content-Type-Options",
