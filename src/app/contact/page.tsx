@@ -1,3 +1,5 @@
+import { HostedContactEmbed } from "@/components/HostedContactEmbed";
+
 export const metadata = {
   title: "Contact",
   description: "Send an enquiry to Sunset Country Tech for computer repairs, IT support, digital literacy, Wi-Fi help, business IT or 3D printing.",
@@ -15,15 +17,7 @@ export default function ContactPage() {
             <p>No physical shop address is listed because support is arranged around the job: on-site, remote, collection/drop-off or a digital literacy session.</p>
           </div>
         </div>
-        <div className="min-h-[1120px] overflow-hidden rounded-[8px]">
-          <div id="sct-contact-form"></div>
-          <script
-            src="https://sunsetcountry.tech/embed/contact"
-            data-mount="#sct-contact-form"
-            data-min-height="1120px"
-            async
-          ></script>
-        </div>
+        <HostedContactEmbed />
       </div>
     </section>
   );

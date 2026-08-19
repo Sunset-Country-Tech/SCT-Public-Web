@@ -1,7 +1,28 @@
 export const runtime = "nodejs";
 
+function getPublicOrigin(request: Request) {
+  const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const requestUrl = new URL(request.url);
+  const forwardedHost = (request.headers.get("x-forwarded-host") || request.headers.get("host"))?.split(",")[0]?.trim();
+  const forwardedProto = (request.headers.get("x-forwarded-proto") || requestUrl.protocol.replace(":", "")).split(",")[0]?.trim();
+
+  if (forwardedHost && !forwardedHost.startsWith("0.0.0.0")) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+
+  if (configuredSiteUrl) {
+    return new URL(configuredSiteUrl).origin;
+  }
+
+  if (requestUrl.hostname === "0.0.0.0") {
+    requestUrl.hostname = "localhost";
+  }
+
+  return requestUrl.origin;
+}
+
 export function GET(request: Request) {
-  const origin = new URL(request.url).origin;
+  const origin = getPublicOrigin(request);
   const script = `(() => {
   const currentScript = document.currentScript;
   const iframe = document.createElement("iframe");
