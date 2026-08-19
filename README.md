@@ -116,7 +116,21 @@ SCT_PUBLIC_INTAKE_SECRET=same-secret-as-internal-PUBLIC_INTAKE_SECRET
 
 ## Contact Intake Integration
 
-The browser submits the contact form to the public site at `POST /api/contact`. The form also has plain HTML fallback attributes: `action="/api/contact"`, `method="post"` and `encType="multipart/form-data"`. That public endpoint validates the form, checks the honeypot and file limits, then forwards the original `multipart/form-data` request to `INTERNAL_INTAKE_API_URL` or `SCT_INTERNAL_INTAKE_URL`.
+The Contact page mounts the hosted form with:
+
+```html
+<div id="sct-contact-form"></div>
+<script
+  src="https://sunsetcountry.tech/embed/contact"
+  data-mount="#sct-contact-form"
+  data-min-height="1120px"
+  async
+></script>
+```
+
+Do not add a second local contact form to the Contact page. The hosted embed contains the styled form, multipart upload handling, validation and submission.
+
+The hosted form submits to `POST /api/contact`. The form also has plain HTML fallback attributes: `action="/api/contact"`, `method="post"` and `encType="multipart/form-data"`. That public endpoint validates the form, checks the honeypot and file limits, then forwards the original `multipart/form-data` request to `INTERNAL_INTAKE_API_URL` or `SCT_INTERNAL_INTAKE_URL`.
 
 The forwarded request includes:
 
